@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // List<User> findUsersByCity(String city);
+    List<User> findUsersByAddressCity(String cityToSearch);
 
     // Define a custom query using @Query to join User with Address
 }

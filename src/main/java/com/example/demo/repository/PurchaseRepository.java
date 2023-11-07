@@ -2,9 +2,14 @@ package com.example.demo.repository;
 
 import com.example.demo.domain.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
-    // You can add custom query methods here if needed
+    @Query("SELECT p FROM Purchase p WHERE p.user.address.city = :city ORDER BY p.timestamp DESC")
+    List<Purchase> findPurchasesDeliveredToCityOrderByTimestampDesc(@Param("city") String city);
 }

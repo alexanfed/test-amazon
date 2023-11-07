@@ -21,4 +21,7 @@ public class Item {
 
     @Column(name = "price")
     private double price;
+
+    public Item() {
+    }
 }

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @Builder
@@ -20,4 +22,9 @@ public class Purchase {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "timestamp")
+    private LocalDateTime timestamp;
+
+    public Purchase() {
+    }
 }

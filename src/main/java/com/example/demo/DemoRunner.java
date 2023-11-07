@@ -1,10 +1,17 @@
 package com.example.demo;
 
 import com.example.demo.domain.*;
+import com.example.demo.repository.ItemRepository;
+import com.example.demo.repository.PurchaseRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.*;
+import com.example.demo.util.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class DemoRunner implements CommandLineRunner {
@@ -23,6 +30,21 @@ public class DemoRunner implements CommandLineRunner {
 
     @Autowired
     private PurchaseDetailsService purchaseDetailsService;
+
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
+
+    private final PurchaseRepository purchaseRepository;
+
+    private final DataService dataService;
+
+    @Autowired
+    public DemoRunner(UserRepository userRepository, ItemRepository itemRepository, PurchaseRepository purchaseRepository, DataService dataService) {
+        this.userRepository = userRepository;
+        this.itemRepository = itemRepository;
+        this.purchaseRepository = purchaseRepository;
+        this.dataService = dataService;
+    }
 
     @Override
     public void run(String... args) throws Exception {
@@ -58,7 +80,7 @@ public class DemoRunner implements CommandLineRunner {
         userService.saveUser(user1);
         userService.saveUser(user2);
 
-        // Create and save Item objects
+        // Populate the Item entities
         Item item1 = Item.builder()
                 .name("Item 1")
                 .price(10.99)
@@ -73,24 +95,59 @@ public class DemoRunner implements CommandLineRunner {
         itemService.saveItem(item1);
         itemService.saveItem(item2);
 
-        // ... Add more items as needed
 
-        // Create a Purchase object
+        // Populate the Purchase entity
         Purchase purchase = Purchase.builder()
                 .user(user1)
+                .timestamp(LocalDateTime.now())
                 .build();
 
         // Save the purchase to the database
         purchaseService.savePurchase(purchase);
 
-        // Create an instance of PurchaseDetails
+        // Populate the PurchaseDetails
         PurchaseDetails purchaseDetails = PurchaseDetails.builder()
                 .purchase(purchase)  // Replace 'purchase' with an actual Purchase object
                 .item(item1)  // Replace 'item' with an actual Item object
                 .quantity(2)  // Set the quantity as needed
                 .build();
 
-        // Save the PurchaseDetails
+        // Save the PurchaseDetails to the database
         purchaseDetailsService.savePurchaseDetails(purchaseDetails);
+
+        // Select all Users
+        List<User> allUsers = userRepository.findAll();
+        for (User user : allUsers) {
+            System.out.println("User: " + user.getUsername() + user.getEmail() + user.getAddress());
+        }
+
+        // Select all Users in a specific city
+        String cityToSearch = "New York";  // Replace with the city you want to search for
+        List<User> usersInCity = userRepository.findUsersByAddressCity(cityToSearch);
+
+        System.out.println("Users in " + cityToSearch + ":");
+        for (User user : usersInCity) {
+            System.out.println("User: " + user.getUsername() + user.getAddress());
+        }
+
+        // Select items purchased by user by ID
+        Long userId = 914539563502436353L;  // Replace with the user's ID you're interested in
+
+        List<Item> itemsPurchasedByUser = itemRepository.findItemsPurchasedByUserId(userId);
+
+        System.out.println("Items purchased by the user with ID " + userId + ":");
+        for (Item item : itemsPurchasedByUser) {
+            System.out.println("Item Name: " + item.getName());
+        }
+
+        // Replace 'city' with the desired city name (e.g., "New York")
+        String city = "New York";
+
+        List<Purchase> purchasesInNewYork = purchaseRepository.findPurchasesDeliveredToCityOrderByTimestampDesc(city);
+
+        System.out.println("Purchases delivered to " + city + " (sorted by timestamp in descending order):");
+        for (Purchase purchase1 : purchasesInNewYork) {
+            System.out.println("Purchase ID: " + purchase1.getId() + ", Timestamp: " + purchase.getTimestamp());
+        }
     }
 }
